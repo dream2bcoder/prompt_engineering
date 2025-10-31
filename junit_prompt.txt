@@ -1,0 +1,83 @@
+Generate complete, production-quality unit tests for my Spring Boot 3.4+ application 
+using Java {17|21|25}, JUnit 5, and spring-boot-starter-test.
+
+========================
+General Requirements
+========================
+1. Coverage
+   - Target ~100% line and branch coverage.
+   - Include success, failure, and edge-case scenarios.
+   - Test exception handling, null inputs, and boundary conditions.
+
+2. Frameworks & Annotations
+   - Use JUnit 5 (@Test, @BeforeEach, @ParameterizedTest).
+   - Use appropriate Spring Boot test annotations per layer (see Layered Specifications).
+   - Use @org.springframework.test.context.bean.override.mockito.MockitoBean for mocking service beans.
+   - Use @InjectMocks for service implementation beans.
+   - Use @Mock for data repository beans.
+
+3. Naming Convention
+   - Test classes must follow the actual class naming convention.
+   - For example, if the production class is `UserService`, the test class must be named `UserServiceTest`.
+   - Maintain one test class per production class.
+
+4. Assertions & Verifications
+   - Use Assertions.assertEquals, assertThrows, assertTrue, etc.
+   - Verify interactions with mocks (verify(mock, times(1))).
+   - For collections, use assertIterableEquals or Hamcrest matchers.
+
+5. Best Practices
+   - Avoid hard-coded test data: prefer builders or factory methods.
+   - Keep tests isolated, deterministic, and readable.
+   - Add comments for non-trivial scenarios.
+
+6. Output
+   - Provide the full test class with imports and annotations.
+   - Include setup code (@BeforeEach) and configuration.
+   - Ensure compatibility with Java {17|21|25} and Spring Boot 3.4+.
+
+========================
+Layered Specifications
+========================
+1. Controller Layer
+   - Annotate test classes with @SpringBootTest and @AutoConfigureMockMvc.
+   - Use MockMvc for endpoint testing.
+   - Mock service dependencies with @org.springframework.test.context.bean.override.mockito.MockitoBean.
+   - Cover success, failure, validation errors, and edge cases.
+   - Verify HTTP status codes, response bodies, and JSON serialization.
+
+2. Service Layer
+   - Annotate test classes with @ExtendWith(SpringExtension.class).
+   - Use @InjectMocks for the service implementation under test.
+   - Use @org.springframework.test.context.bean.override.mockito.MockitoBean for service beans.
+   - Use @Mock for repositories, Kafka producers/consumers, and external clients.
+   - Test business logic thoroughly: success paths, exceptions, null inputs, and boundary conditions.
+   - Verify interactions with mocked dependencies (e.g., repository.save, kafkaTemplate.send).
+
+3. Data Layer
+   - Annotate test classes with @DataJpaTest.
+   - Use @Mock for repository beans if mocking is required.
+   - Simulate repository behavior (findById, save, delete, etc.).
+   - Cover scenarios like empty results, constraint violations, and exceptions.
+   - Verify repository methods are invoked correctly.
+
+4. Component Classes
+   - If the production class is annotated with @Component and you are writing a unit test for it,
+     make sure the test class is annotated with @ExtendWith(SpringExtension.class).
+   - Use @InjectMocks to inject the @Component under test.
+   - Mock its collaborators with @Mock or @org.springframework.test.context.bean.override.mockito.MockitoBean as appropriate.
+
+5. Global Exception Handling
+   - For classes annotated with @ControllerAdvice or @RestControllerAdvice:
+     - Create a dedicated test class named after the advice class (e.g., GlobalExceptionHandler → GlobalExceptionHandlerTest).
+     - Annotate the test class with @WebMvcTest(GlobalExceptionHandler.class).
+     - Use MockMvc to simulate HTTP requests that trigger exceptions.
+     - Define a nested static @RestController inside the test class to deliberately throw exceptions 
+       (e.g., ResourceNotFoundException, RuntimeException).
+     - Write test methods that:
+       - Perform GET requests against the test controller endpoints.
+       - Assert that the correct @ExceptionHandler method is invoked.
+       - Verify the returned HTTP status codes (e.g., 404, 500).
+       - Verify the response body content (e.g., "Resource not found", "An unexpected error occurred").
+     - Cover multiple exception scenarios: known application exceptions and generic runtime exceptions.
+     - Ensure JSON or plain text error responses contain the expected message.
