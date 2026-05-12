@@ -1,0 +1,17 @@
+create tables for customer demographics and addresses and corresponding audit tables prefixed with audit_ and on trigger insert, update and delete insert all informations from entity tables with audit tables and also store action of operation in additional column in audit tables.
+
+Add audit_map table with column table_name, table_pk, field, field_name, screen and section where table_name, table_pk and field_name are related to actual tables name, theirs primary key field and individual fields/columns respectively. other hand screen, section and fields are part of UI screens how those are appearing in UI and make assumpsion here.
+
+Write a dynamic or generic stored procedure to get change logs for old value, new value, identified field, identified value for individual actions for any tables and their respective audit tables by interectiing with audit_map table where change log consist of screen, section, field, old value, new value, identified field, identified value for individual actions.
+
+if identified field, identified value are special fields or manipulated fields returns in sub-procedure with or without temporary table returned values or put N/A for default or non-applicable case.
+
+Make sure main stored procedure is production grade with millions of rows, pagable and highly optimized and it's take only three parameters limit, offset and remain_rows.
+
+Multiple users may fetch changes different customer simultaneously same time. 
+
+Database vendor is MySQL.
+
+Example: address tables can have a column denote address type (Home, Work, Mail, Other) and identify field and identify value may have Address Type and Home if home address type picked for a entry so that in the UI all similar addresses for a customer appear in a group and easily understandable by end user.
+
+Note: write complete SQL script 
