@@ -9,6 +9,9 @@ For table lookup_reference and lookup_reference_detail change log stored procedu
 
 With lookup_reference for list of allowed category and subcategory pair `${category}-${subcategory}` (along with null check) should appear as Identified Field and lookup_value as Identified Value for same reference_id, group_type, group_id grouped pair where 'field_name' will be name/text defined in 'key' column and old value/new value comes from 'value' column from lookup_reference_detail table respectively.
 
+create table insertions with dummy data of 5 different category and 5 subtype for individual in real world and same for lookup_code and respective lookup_value for lookup_reference. Then do data insertion for 5-10 set of those combinations and corresponding address as group_type, all address components like road, city, zip, country as 'key' and respective values, phone another group_type with mobile phone, land line, fax etc and all group_type has respective group_id but different for another entry group_type for a reference_id.
+generate audit_map insertion data accordingly
+
 CREATE TABLE `audit_map` (
   `id` int NOT NULL AUTO_INCREMENT,
   `table_name` varchar(100) DEFAULT NULL,
