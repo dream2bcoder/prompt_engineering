@@ -1,0 +1,91 @@
+I have two tables and respective audit tables prefix with audit_ and also the audit_map table. on trigger insert, update and delete insert all informations from entity tables with audit tables and also store action of operation in additional column in audit tables.
+
+we have audit_map table with column table_name, table_pk, field, field_name, screen and section where table_name, table_pk and field_name are related to actual tables name, theirs primary key field and individual fields/columns respectively. other hand screen, section and fields are part of UI screens how those are appearing in UI and make assumpsion here.
+
+Write a dynamic or generic stored procedure to get change logs for old value, new value, identified field, identified value for individual actions to very specific tables lookup_reference and lookup_reference_detail and their respective audit tables by interectiing with audit_map table where change log consist of screen, section, field, old value, new value, identified field, identified value for individual actions only for actual changes. On insert old value null and on delete new value null. change log should appear for a field when there is actual change between old value and new value.
+if identified field, identified value are special fields or manipulated fields returns in sub-procedure with or without temporary table returned values or put N/A for default or non-applicable case.
+
+For table lookup_reference and lookup_reference_detail change log stored procedure should configurable and less affort on inserting new category and subcategory, lookup_code, lookup_value in lookup_reference table and same way on inserting new group_id, group_type, key, value in lookup_reference_detail.
+
+With lookup_reference for list of allowed category and subcategory pair `${category}-${subcategory}` (along with null check) should appear as Identified Field and lookup_value as Identified Value for same reference_id, group_type, group_id grouped pair where 'field_name' will be name/text defined in 'key' column and old value/new value comes from 'value' column from lookup_reference_detail table respectively.
+
+CREATE TABLE `audit_map` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `table_name` varchar(100) DEFAULT NULL,
+  `table_pk` varchar(100) DEFAULT NULL,
+  `field_name` varchar(100) DEFAULT NULL,
+  `field` varchar(100) DEFAULT NULL,
+  `screen` varchar(100) DEFAULT NULL,
+  `section` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_tbl_field` (`table_name`,`field_name`)
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `lookup_reference` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `category` varchar(50) NOT NULL,
+  `subcategory` varchar(50) DEFAULT NULL,
+  `lookup_code` varchar(50) DEFAULT NULL,
+  `lookup_value` varchar(255) DEFAULT NULL,
+  `is_active` tinyint NOT NULL DEFAULT '1',
+  `created_dttm` datetime DEFAULT CURRENT_TIMESTAMP,
+  `modified_dttm` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `category` (`category`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `lookup_reference_detail` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `reference_id` int NOT NULL,
+  `group_id` int DEFAULT NULL,
+  `group_type` varchar(50) DEFAULT NULL,
+  `key` varchar(100) DEFAULT NULL,
+  `value` text,
+  `is_active` tinyint NOT NULL DEFAULT '1',
+  `created_dttm` datetime DEFAULT CURRENT_TIMESTAMP,
+  `modified_dttm` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `reference_id` (`reference_id`),
+  KEY `group_type` (`group_type`),
+  KEY `group_id` (`group_id`),
+  KEY `reference_id_2` (`reference_id`,`group_id`,`group_type`),
+  CONSTRAINT `lookup_reference_detail_ibfk_1` FOREIGN KEY (`reference_id`) REFERENCES `lookup_reference` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `audit_lookup_reference` (
+  `auditAction` enum('INSERT','UPDATE','DELETE') DEFAULT NULL,
+  `auditTimestamp` datetime DEFAULT CURRENT_TIMESTAMP,
+  `auditId` int NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL,
+  `category` varchar(50) NOT NULL,
+  `subcategory` varchar(50) DEFAULT NULL,
+  `lookup_code` varchar(50) DEFAULT NULL,
+  `lookup_value` varchar(255) DEFAULT NULL,
+  `is_active` tinyint NOT NULL DEFAULT '1',
+  `created_dttm` datetime DEFAULT CURRENT_TIMESTAMP,
+  `modified_dttm` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`auditId`),
+  KEY `auditTimestamp` (`auditTimestamp`),
+  KEY `auditAction` (`auditAction`),
+  KEY `id` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `audit_lookup_reference_detail` (
+  `auditAction` enum('INSERT','UPDATE','DELETE') DEFAULT NULL,
+  `auditTimestamp` datetime DEFAULT CURRENT_TIMESTAMP,
+  `auditId` int NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL,
+  `reference_id` int NOT NULL,
+  `group_id` int DEFAULT NULL,
+  `group_type` varchar(50) DEFAULT NULL,
+  `key` varchar(100) DEFAULT NULL,
+  `value` text,
+  `is_active` tinyint NOT NULL DEFAULT '1',
+  `created_dttm` datetime DEFAULT CURRENT_TIMESTAMP,
+  `modified_dttm` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`auditId`),
+  KEY `auditTimestamp` (`auditTimestamp`),
+  KEY `auditAction` (`auditAction`),
+  KEY `id` (`id`),
+  KEY `reference_id` (`reference_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
