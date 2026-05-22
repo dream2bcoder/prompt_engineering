@@ -12,6 +12,17 @@ With lookup_reference for list of allowed category and subcategory pair `${categ
 create table insertions with dummy data of 5 different category and 5 subtype for individual in real world and same for lookup_code and respective lookup_value for lookup_reference. Then do data insertion for 5-10 set of those combinations and corresponding address as group_type, all address components like road, city, zip, country as 'key' and respective values, phone another group_type with mobile phone, land line, fax etc and all group_type has respective group_id but different for another entry group_type for a reference_id.
 generate audit_map insertion data accordingly
 
+Follow-up:
+audit_map can have entries for other screens too but those should not pull in stored procedure.
+
+now there is a twist.
+
+want to hardcode category and subcategory for a separate screen and assume dropdown will have corresponding lookup_value list to pick by user and once user pick one of the lookup value the address and phone attributes auto populate in linkage from lookup_reference_detail table and those changes should appear in change log with particular screen, section, field dynamically so that in future if we make similar change to another screen change log logic should adapt it automatically.
+
+but here is catch. Assume I already have another global change log stored procedure that very generic applies to all screens should be untouched and may or may not aware of this new stored procedure implementation that very specific to the lookup_reference, lookup_reference_detail and wherever this tables links to separate screen  but with same global audit table.
+
+
+
 CREATE TABLE `audit_map` (
   `id` int NOT NULL AUTO_INCREMENT,
   `table_name` varchar(100) DEFAULT NULL,
